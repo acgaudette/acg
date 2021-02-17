@@ -2,6 +2,13 @@
 #define MIN_DT 1e-4
 #endif
 
+enum _time_type {
+	  _T_NONE
+	, _T_REAL
+	, _T_GAME
+	, _T_FIXED
+};
+
 extern struct _time {
 	struct {
 		float real;
@@ -53,3 +60,31 @@ static int _time_step()
 	return 1;
 }
 #endif
+
+static inline float _time_dt(enum _time_type e)
+{
+	switch (e) {
+	case _T_REAL:
+		return _time.dt.real;
+	case _T_GAME:
+		return _time.dt.game;
+	case _T_FIXED:
+#ifdef FIXED_DT
+		return FIXED_DT;
+#endif
+	default:
+		assert(0);
+	}
+}
+
+static inline float _time_el(enum _time_type e)
+{
+	switch (e) {
+	case _T_REAL:
+		return _time.el.real;
+	case _T_GAME:
+		return _time.el.game;
+	default:
+		assert(0);
+	}
+}
