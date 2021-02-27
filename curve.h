@@ -13,3 +13,15 @@ static float rvease(const float s)
 	float b = a * s - .5f * a;
 	return .5f + b * b * b;
 }
+
+// www.desmos.com/calculator/viem5x3qgo
+static float bump(float t, const float height)
+{
+	t = clamp01f(t);
+
+	float in = t - 1.f;
+	float a = (height + 0.f) * in * in;
+	float b = (height + 1.f) * in * in * in + 1.f;
+	float c = a + b;
+	return c;
+}
