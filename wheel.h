@@ -20,7 +20,10 @@ typedef enum {
 	, WHEEL_SW    = 0x10
 	, WHEEL_DU    = 0x20
 	, WHEEL_VERT  = 0x38
+	, WHEEL_BOTH  = 0x3f
 	, WHEEL_QE    = 0x40
+	, WHEEL_DPADH = 0x80
+	, WHEEL_DPADV = 0x100
 } wheel_f;
 
 typedef struct {
@@ -43,6 +46,8 @@ i8 wheel_update(wheel_rep *rep, wheel_f flags)
 	const u8 sw = flags & WHEEL_SW ? -1 : 0;
 	const u8 du = flags & WHEEL_DU ? -1 : 0;
 	const u8 qe = flags & WHEEL_QE ? -1 : 0;
+	const u8 dh = flags & WHEEL_DPADH ? -1 : 0;
+	const u8 dv = flags & WHEEL_DPADV ? -1 : 0;
 
 	i8 single =
 		  ((KEY_DOWN(L) - KEY_DOWN(H)) & hl)
@@ -51,7 +56,9 @@ i8 wheel_update(wheel_rep *rep, wheel_f flags)
 		| ((KEY_DOWN(W) - KEY_DOWN(S)) & sw)
 		| ((KEY_DOWN(Q) - KEY_DOWN(E)) & qe)
 		| ((KEY_DOWN(RIGHT) - KEY_DOWN(LEFT)) & lr)
-		| ((KEY_DOWN(UP)    - KEY_DOWN(DOWN)) & du);
+		| ((KEY_DOWN(UP)    - KEY_DOWN(DOWN)) & du)
+		| ((PAD_DOWN(DPAD_RIGHT) - PAD_DOWN(DPAD_LEFT)) & dh)
+		| ((PAD_DOWN(DPAD_UP)    - PAD_DOWN(DPAD_DOWN)) & dv);
 	i8 multi =
 		  ((KEY_HELD(L) - KEY_HELD(H)) & hl)
 		| ((KEY_HELD(K) - KEY_HELD(J)) & jk)
