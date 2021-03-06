@@ -1,4 +1,14 @@
-#define WHEEL_RATE .2f
+#ifndef WHEEL_RATE_MAX
+#define WHEEL_RATE_MAX .2f
+#endif
+
+#ifndef WHEEL_RATE_MIN
+#define WHEEL_RATE_MIN .01f
+#endif
+
+#ifndef WHEEL_RAMP
+#define WHEEL_RAMP .5f
+#endif
 
 typedef enum {
 	  WHEEL_NONE  = 0x0
@@ -21,8 +31,8 @@ typedef struct {
 
 i8 wheel_update(wheel_rep *rep, wheel_f flags)
 {
-	const float t = clamp01f(rep->timer / .5f);
-	rep->rate = lerpf(WHEEL_RATE, .01f, t);
+	const float t = clamp01f(rep->timer / WHEEL_RAMP);
+	rep->rate = lerpf(WHEEL_RATE_MAX, WHEEL_RATE_MIN, t);
 	rep->pulse -= _time.dt.real;
 	rep->timer += _time.dt.real;
 
@@ -49,12 +59,14 @@ i8 wheel_update(wheel_rep *rep, wheel_f flags)
 		| ((KEY_HELD(W) - KEY_HELD(S)) & sw)
 		| ((KEY_HELD(Q) - KEY_HELD(E)) & qe)
 		| ((KEY_HELD(RIGHT) - KEY_HELD(LEFT)) & lr)
-		| ((KEY_HELD(UP)    - KEY_HELD(DOWN))   & du);
+		| ((KEY_HELD(UP)    - KEY_HELD(DOWN)) & du)
+		| ((PAD_HELD(DPAD_RIGHT) - PAD_HELD(DPAD_LEFT)) & dh)
+		| ((PAD_HELD(DPAD_UP)    - PAD_HELD(DPAD_DOWN)) & dv);
 
 	i8 wheel = single;
 
 	if (wheel) {
-		rep->pulse = WHEEL_RATE;
+		rep->pulse = WHEEL_RATE_MAX;
 		rep->timer = 0.f;
 	} else if (rep->pulse < 0) {
 		wheel = multi;
