@@ -1,0 +1,5 @@
+#!/bin/sh
+
+test -z $1 && echo "no input" && exit 1
+clear
+clang -ggdb -O0 -I . test_$1.c -o test_$1 && ./test_$1
