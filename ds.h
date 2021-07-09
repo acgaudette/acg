@@ -1,3 +1,4 @@
+#include <string.h>
 #include "acg/alloc.h"
 
 #define MAX(A, B) ((A) > (B) ? (A) : (B))
@@ -70,3 +71,58 @@ static inline void *abuf_push(abuf *abuf)
 #define VBUF_INIT(VAR) VAR ## _n = 0
 #define VBUF_PUSH(VAR) \
 	(assert(VAR ## _n < sizeof(VAR) / sizeof(VAR[0])), VAR + VAR ## _n++)
+
+// In-place counting sort, where k is the maximum value returned by keyof()
+typedef u16 (*keyof)(void*);
+static void sort_count(
+	void *buf,
+	u16 k,
+	keyof keyof,
+	const u32 n,
+	const u32 size,
+	const u32 align
+) {
+	assert(buf);
+	assert(k);
+	assert(size);
+	assert(align);
+
+	// Values of k should be small (otherwise, why are you using this?)
+	// and therefore the stack should be fine.
+	// This way, we're reetrant.
+	u16 len = k + 1;
+	u32 end[len * 2], *beg = end + len;
+	char swap[size];
+
+	memset(end, 0, sizeof(u32) * len);
+	memset(beg, 0, sizeof(u32) * len);
+
+	for (u32 i = 0; i < align * n; i += align) {
+		void *entry = (char*)buf + i;
+		u16 key = keyof(entry);
+		++end[key];
+	}
+
+	for (u16 i = 1; i < len; ++i) {
+		end[i] += end[i - 1];
+		beg[i]  = end[i - 1];
+	}
+
+	for (u32 i = 0; i < align * n; i += align) {
+		void *entry = (char*)buf + i;
+		u16 key = keyof(entry);
+
+		while (end[key] != beg[key]) {
+			void *cmp = (char*)buf + align * --end[key];
+			if (key == keyof(cmp))
+				continue;
+
+			// Swap
+			void *target = (char*)buf + align * end[key];
+			memcpy(  swap, target, size);
+			memcpy(target,  entry, size);
+			memcpy( entry,   swap, size);
+			key = keyof(entry);
+		}
+	}
+}
