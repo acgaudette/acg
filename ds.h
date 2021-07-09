@@ -64,3 +64,9 @@ static inline void *abuf_push(abuf *abuf)
 	assert(abuf->n < abuf->cap);
 	return (char*)abuf + abuf->off + abuf->size * abuf->n++;
 }
+
+#define VBUF(VAR, T, CAP) u32 VAR ## _n ; T VAR [ CAP ]
+#define VBUF_MK(VAR, T, CAP) u32 VAR ## _n = 0; T VAR [ CAP ]
+#define VBUF_INIT(VAR) VAR ## _n = 0
+#define VBUF_PUSH(VAR) \
+	(assert(VAR ## _n < sizeof(VAR) / sizeof(VAR[0])), VAR + VAR ## _n++)
