@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include "acg/ds.h"
 
+#define TEST_HDR(NAME) static void test_ ## NAME () \
+{ \
+	printf("\t%s\n\n", __func__);
+#define TEST_FTR \
+}
+
 static void abuf_print(abuf *buf)
 {
 	printf(
@@ -18,8 +24,7 @@ static void abuf_print(abuf *buf)
 	printf("\n");
 }
 
-static void test_1()
-{
+TEST_HDR(abuf)
 	abuf *buf;
 	ABUF_MK(buf, int, 2, ALLOC_SYS);
 
@@ -46,7 +51,7 @@ static void test_1()
 	assert(*(int*)abuf_get(buf, 1) == 5);
 
 	abuf_print(buf);
-}
+TEST_FTR
 
 struct pod {
 	u32 a;
@@ -55,8 +60,7 @@ struct pod {
 	double d;
 };
 
-static void test_2()
-{
+TEST_HDR(abuf_vmem)
 	abuf *buf;
 	u32 size = 1024 * 2;
 	ABUF_MK_MB(buf, struct pod, size, ALLOC_VMEM);
@@ -73,10 +77,47 @@ static void test_2()
 	assert(((struct pod*)abuf_get(buf, 0))->d == 16.f);
 
 	abuf_print(buf);
+TEST_FTR
+
+static void vbuf_print(u64 *buf, u32 n)
+{
+	for (u32 i = 0; i < n; ++i) {
+		printf("sizes[%u] = %lu\n", i, buf[i]);
+	}
+
+	printf("\n");
 }
+
+static u16 sizes_keyof(void *e)
+{
+	size_t size = *(size_t*)e;
+	return (u16)size;
+}
+
+TEST_HDR(vbuf)
+	VBUF_MK(sizes, u64, 64);
+
+	*VBUF_PUSH(sizes) = 3;
+	*VBUF_PUSH(sizes) = 1;
+	*VBUF_PUSH(sizes) = 0;
+	*VBUF_PUSH(sizes) = 3;
+	*VBUF_PUSH(sizes) = 2;
+
+	assert(sizes_n == 5);
+	assert(sizes[0] == 3);
+	assert(sizes[1] == 1);
+	assert(sizes[2] == 0);
+	assert(sizes[3] == 3);
+	assert(sizes[4] == 2);
+
+	vbuf_print(sizes, sizes_n);
+	sort_count(sizes, 3, sizes_keyof, sizes_n, sizeof(u64), sizeof(u64));
+	vbuf_print(sizes, sizes_n);
+TEST_FTR
 
 int main()
 {
-	test_1();
-	test_2();
+	test_abuf();
+	test_abuf_vmem();
+	test_vbuf();
 }
