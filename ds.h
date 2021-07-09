@@ -59,6 +59,12 @@ static inline void *abuf_get(abuf *abuf, u32 i)
 	return (char*)abuf + abuf->off + abuf->size * i;
 }
 
+static inline void *abuf_get_raw(abuf *abuf)
+{
+	assert(abuf);
+	return abuf_get(abuf, 0);
+}
+
 static inline void *abuf_push(abuf *abuf)
 {
 	assert(abuf);
