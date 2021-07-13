@@ -110,8 +110,14 @@ static void abuf_clear(abuf *abuf)
 #define VBUF(VAR, T, CAP) u32 VAR ## _n ; T VAR [ CAP ]
 #define VBUF_MK(VAR, T, CAP) u32 VAR ## _n = 0; T VAR [ CAP ]
 #define VBUF_INIT(VAR) VAR ## _n = 0
+
+#define VBUF_I(VAR, ENTRY) (ENTRY - VAR)
+#define VBUF_CAP(VAR) (sizeof(VAR) / sizeof(VAR[0]))
+
 #define VBUF_PUSH(VAR) \
-	(assert(VAR ## _n < sizeof(VAR) / sizeof(VAR[0])), VAR + VAR ## _n++)
+	(assert(VAR ## _n < VBUF_CAP(VAR)), VAR + VAR ## _n++)
+#define VBUF_RMSWAP(VAR, ENTRY) \
+	(assert(VBUF_I(VAR, ENTRY) < VAR ## _n), *ENTRY = VAR[--VAR ## _n])
 
 #define VBUF_ITER(VAR) for ( \
 	struct { u32 i; void *val; } iter = { .val = VAR }; \
