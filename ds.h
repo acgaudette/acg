@@ -87,6 +87,19 @@ static inline void *abuf_push(abuf *abuf)
 	return ABUF_GET_RAW(abuf) + abuf->size * abuf->n++;
 }
 
+static inline void *abuf_pop(abuf *abuf)
+{
+	assert(abuf);
+	assert(abuf->n);
+	return ABUF_GET_RAW(abuf) + abuf->size * abuf->n--;
+}
+
+static void abuf_clear(abuf *abuf)
+{
+	assert(abuf);
+	abuf->n = 0;
+}
+
 #define VBUF(VAR, T, CAP) u32 VAR ## _n ; T VAR [ CAP ]
 #define VBUF_MK(VAR, T, CAP) u32 VAR ## _n = 0; T VAR [ CAP ]
 #define VBUF_INIT(VAR) VAR ## _n = 0
