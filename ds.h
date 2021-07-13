@@ -53,24 +53,38 @@ static abuf *abuf_mk(
 	return abuf;
 }
 
+#define ABUF_GET_UNSAFE(VAR, I) ((char*)VAR + VAR->off + VAR->size * I)
 static inline void *abuf_get(abuf *abuf, u32 i)
 {
 	assert(abuf);
 	assert(i < abuf->n);
-	return (char*)abuf + abuf->off + abuf->size * i;
+	return ABUF_GET_UNSAFE(abuf, i);
 }
 
-static inline void *abuf_get_raw(abuf *abuf)
+#define ABUF_HEAD(VAR) abuf_get(VAR, 0)
+#define ABUF_TAIL(VAR) abuf_get(VAR, VAR->n - 1)
+#define ABUF_GET_RAW(VAR) ((char*)VAR + VAR->off)
+
+static inline void *abuf_next(abuf *abuf, void *entry)
 {
 	assert(abuf);
-	return abuf_get(abuf, 0);
+	if (!abuf->n)
+		return NULL;
+	if (!entry)
+		return ABUF_HEAD(abuf);
+
+	char *end = entry;
+	char *beg = ABUF_GET_RAW(abuf);
+
+	return (u64)(end - beg) / abuf->size < abuf->n - 1?
+			(void*)(end + abuf->size) : NULL;
 }
 
 static inline void *abuf_push(abuf *abuf)
 {
 	assert(abuf);
 	assert(abuf->n < abuf->cap);
-	return (char*)abuf + abuf->off + abuf->size * abuf->n++;
+	return ABUF_GET_RAW(abuf) + abuf->size * abuf->n++;
 }
 
 #define VBUF(VAR, T, CAP) u32 VAR ## _n ; T VAR [ CAP ]
