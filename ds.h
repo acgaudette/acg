@@ -100,11 +100,27 @@ static void abuf_clear(abuf *abuf)
 	abuf->n = 0;
 }
 
+#define ABUF_ITER(VAR) for ( \
+	struct { u32 i; void *val; } iter = { .val = ABUF_HEAD(VAR) }; \
+	iter.i < VAR->n; \
+	iter.val = ABUF_GET_UNSAFE(VAR, ++iter.i))
+#define ABUF_FOREACH(VAR, T) \
+	for (T *T = abuf_next(VAR, NULL); T; T = abuf_next(VAR, T))
+
 #define VBUF(VAR, T, CAP) u32 VAR ## _n ; T VAR [ CAP ]
 #define VBUF_MK(VAR, T, CAP) u32 VAR ## _n = 0; T VAR [ CAP ]
 #define VBUF_INIT(VAR) VAR ## _n = 0
 #define VBUF_PUSH(VAR) \
 	(assert(VAR ## _n < sizeof(VAR) / sizeof(VAR[0])), VAR + VAR ## _n++)
+
+#define VBUF_ITER(VAR) for ( \
+	struct { u32 i; void *val; } iter = { .val = VAR }; \
+	iter.i < VAR ## _n; \
+	iter.val = ++iter.i + VAR)
+#define VBUF_ENUM(VAR, E) \
+	E = VAR ; for (u32 i = 0; i < VAR ## _n; E = ++i + VAR)
+#define VBUF_FOREACH(VAR, T) \
+	for (T *T = VAR; T - VAR < VAR ## _n; ++T)
 
 // In-place counting sort, where k is the maximum value returned by keyof()
 typedef u16 (*keyof)(void*);
