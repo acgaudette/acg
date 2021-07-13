@@ -132,3 +132,6 @@ static void sort_count(
 		}
 	}
 }
+
+#define ABUF_SORT_COUNT(VAR, T, K, FN) \
+	sort_count(ABUF_GET_RAW(VAR), K, FN, VAR->n, sizeof(T), VAR->size)
