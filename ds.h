@@ -63,6 +63,7 @@ static inline void *abuf_get(abuf *abuf, u32 i)
 
 #define ABUF_HEAD(VAR) abuf_get(VAR, 0)
 #define ABUF_TAIL(VAR) abuf_get(VAR, VAR->n - 1)
+#define ABUF_I(VAR, E) (((char*)E - (char*)ABUF_HEAD(VAR)) / VAR->size)
 #define ABUF_GET_RAW(VAR) ((char*)VAR + VAR->off)
 
 static inline void *abuf_next(abuf *abuf, void *entry)
