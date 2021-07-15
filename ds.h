@@ -125,8 +125,12 @@ static void abuf_clear(abuf *abuf)
 	struct { u32 i; void *val; } iter = { .val = ABUF_HEAD(VAR) }; \
 	iter.i < VAR->n; \
 	iter.val = ABUF_GET_UNSAFE(VAR, ++iter.i))
-#define ABUF_FOREACH(VAR, T) \
+#define ABUF_FOREACH_SAFE(VAR, T) \
 	for (T *T = abuf_next(VAR, NULL); T; T = abuf_next(VAR, T))
+#define ABUF_FOREACH(VAR, T) for (    \
+	T *T = ABUF_HEAD_UNSAFE(VAR); \
+	(void*)T < ABUF_NPTR(VAR);    \
+	T = ABUF_NEXT_UNSAFE(VAR, T))
 
 #define VBUF(VAR, T, CAP) u32 VAR ## _n ; T VAR [ CAP ]
 #define VBUF_MK(VAR, T, CAP) u32 VAR ## _n = 0; T VAR [ CAP ]
