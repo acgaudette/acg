@@ -91,6 +91,23 @@ static inline void *abuf_push(abuf *abuf)
 	return ABUF_HEAD_UNSAFE(abuf) + abuf->size * abuf->n++;
 }
 
+#define ABUF_RMSWAP(VAR, E) abuf_rmswap(VAR, E, sizeof(*E))
+static inline void abuf_rmswap(abuf *abuf, void *entry, u32 size)
+{
+	assert(abuf);
+
+	switch (abuf->n) {
+	case 0:
+		panic();
+	default:
+		memcpy(entry, abuf_get(abuf, abuf->n - 1), size);
+	case 1:
+		break;
+	}
+
+	--abuf->n;
+}
+
 static inline void *abuf_pop(abuf *abuf)
 {
 	assert(abuf);
