@@ -33,7 +33,7 @@ static void dump_vmem()
 
 	char *str = NULL;
 	size_t n;
-	unsigned total;
+	unsigned total = 0;
 
 	while (-1 != getline(&str, &n, smaps)) {
 		unsigned size;
@@ -45,7 +45,11 @@ static void dump_vmem()
 	if (str) free(str);
 	fclose(smaps);
 
-	printf("addressable vmem usage: %.1f MiB\n", total / 1024.f);
+	printf(
+		"addressable vmem usage: %.1f MiB (~%.1f GiB)\n",
+		total / (1024.f),
+		total / (1024.f * 1024.f)
+	);
 #endif
 }
 
