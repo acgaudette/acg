@@ -4,7 +4,8 @@
 #define TEST_HDR(NAME) static void test_ ## NAME () \
 { \
 	printf("\t%s\n\n", __func__);
-#define TEST_FTR \
+#define TEST_FTR      \
+	printf("\n"); \
 }
 
 static void abuf_print(abuf *buf)
@@ -20,8 +21,6 @@ static void abuf_print(abuf *buf)
 	for (u32 i = 0; i < buf->n; ++i) {
 		printf("buf[%u]=%d\n", i, *(int*)abuf_get(buf, i));
 	}
-
-	printf("\n");
 }
 
 TEST_HDR(abuf)
@@ -53,12 +52,12 @@ TEST_HDR(abuf)
 	abuf_print(buf);
 TEST_FTR
 
-struct pod {
+typedef struct pod {
 	u32 a;
 	float b;
 	u64 c;
 	double d;
-};
+} pod;
 
 TEST_HDR(abuf_vmem)
 	abuf *buf;
@@ -77,6 +76,14 @@ TEST_HDR(abuf_vmem)
 	assert(((struct pod*)abuf_get(buf, 0))->d == 16.f);
 
 	abuf_print(buf);
+	new = abuf_push(buf);
+	new->a = 64;
+
+	ABUF_FOREACH(buf, pod) {
+		printf("pod->a = %u, buf->n = %u\n", pod->a, buf->n);
+		ABUF_RMSWAP(buf, pod);
+		pod = ABUF_PREV_UNSAFE(buf, pod);
+	}
 TEST_FTR
 
 static void vbuf_print(u64 *buf, u32 n)
