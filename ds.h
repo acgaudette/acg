@@ -61,10 +61,10 @@ static inline void *abuf_get(abuf *abuf, u32 i)
 	return ABUF_GET_UNSAFE(abuf, i);
 }
 
+#define ABUF_HEAD_UNSAFE(VAR) ((void*)((char*)VAR + VAR->off))
 #define ABUF_HEAD(VAR) abuf_get(VAR, 0)
 #define ABUF_TAIL(VAR) abuf_get(VAR, VAR->n - 1)
 #define ABUF_I(VAR, E) (((char*)E - (char*)ABUF_HEAD(VAR)) / VAR->size)
-#define ABUF_GET_RAW(VAR) ((char*)VAR + VAR->off)
 
 static inline void *abuf_next(abuf *abuf, void *entry)
 {
@@ -75,7 +75,7 @@ static inline void *abuf_next(abuf *abuf, void *entry)
 		return ABUF_HEAD(abuf);
 
 	char *end = entry;
-	char *beg = ABUF_GET_RAW(abuf);
+	char *beg = ABUF_HEAD_UNSAFE(abuf);
 
 	return (u64)(end - beg) / abuf->size < abuf->n - 1?
 			(void*)(end + abuf->size) : NULL;
@@ -85,14 +85,14 @@ static inline void *abuf_push(abuf *abuf)
 {
 	assert(abuf);
 	assert(abuf->n < abuf->cap);
-	return ABUF_GET_RAW(abuf) + abuf->size * abuf->n++;
+	return ABUF_HEAD_UNSAFE(abuf) + abuf->size * abuf->n++;
 }
 
 static inline void *abuf_pop(abuf *abuf)
 {
 	assert(abuf);
 	assert(abuf->n);
-	return ABUF_GET_RAW(abuf) + abuf->size * abuf->n--;
+	return ABUF_HEAD_UNSAFE(abuf) + abuf->size * abuf->n--;
 }
 
 static void abuf_clear(abuf *abuf)
@@ -185,4 +185,4 @@ static void sort_count(
 }
 
 #define ABUF_SORT_COUNT(VAR, T, K, FN) \
-	sort_count(ABUF_GET_RAW(VAR), K, FN, VAR->n, sizeof(T), VAR->size)
+	sort_count(ABUF_HEAD_UNSAFE(VAR), K, FN, VAR->n, sizeof(T), VAR->size)
