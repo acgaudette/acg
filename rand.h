@@ -10,6 +10,7 @@ static float srandf()
 
 static float randr(const float min, const float max)
 {
+	assert(max >= min);
 	return randf() * (max - min) + min;
 }
 
