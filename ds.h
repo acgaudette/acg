@@ -53,7 +53,7 @@ static abuf *abuf_mk(
 	return abuf;
 }
 
-#define ABUF_GET_UNSAFE(VAR, I) ((char*)VAR + VAR->off + VAR->size * I)
+#define ABUF_GET_UNSAFE(VAR, I) ((void*)((char*)VAR + VAR->off + VAR->size * I))
 static inline void *abuf_get(abuf *abuf, u32 i)
 {
 	assert(abuf);
@@ -65,6 +65,9 @@ static inline void *abuf_get(abuf *abuf, u32 i)
 #define ABUF_HEAD(VAR) abuf_get(VAR, 0)
 #define ABUF_TAIL(VAR) abuf_get(VAR, VAR->n - 1)
 #define ABUF_I(VAR, E) (((char*)E - (char*)ABUF_HEAD(VAR)) / VAR->size)
+#define ABUF_NPTR(VAR) ABUF_GET_UNSAFE(VAR, VAR->n)
+#define ABUF_NEXT_UNSAFE(VAR, E) ((void*)((char*)E + VAR->size))
+#define ABUF_PREV_UNSAFE(VAR, E) ((void*)((char*)E - VAR->size))
 
 static inline void *abuf_next(abuf *abuf, void *entry)
 {
