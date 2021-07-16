@@ -73,7 +73,7 @@ static inline float _time_dt(enum _time_type e)
 		return FIXED_DT;
 #endif
 	default:
-		assert(0);
+		panic();
 	}
 }
 
@@ -85,6 +85,6 @@ static inline float _time_el(enum _time_type e)
 	case _T_GAME:
 		return _time.el.game;
 	default:
-		assert(0);
+		panic();
 	}
 }
