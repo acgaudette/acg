@@ -1,8 +1,6 @@
 #include <string.h>
 #include "acg/alloc.h"
-
-#define MAX(A, B) ((A) > (B) ? (A) : (B))
-#define MIN(A, B) ((A) < (B) ? (A) : (B))
+#include "acg/minmax.h"
 
 typedef struct {
 	u32 size;
