@@ -22,7 +22,7 @@ static char randc()
 #define RAND(N) static v ## N randv ## N () \
 { \
 	v ## N v; \
-	for (u8 i = 0; i < N; ++i) \
+	for (size_t i = 0; i < N; ++i) \
 		v.s[i] = randf(); \
 	return v; \
 }
@@ -35,7 +35,7 @@ RAND(4)
 #define SRAND(N) static v ## N srandv ## N () \
 { \
 	v ## N v; \
-	for (u8 i = 0; i < N; ++i) \
+	for (size_t i = 0; i < N; ++i) \
 		v.s[i] = srandf(); \
 	return v; \
 }
@@ -48,7 +48,7 @@ SRAND(4)
 #define DRAND(N) static v ## N drandv ## N () \
 { \
 	v ## N v; \
-	for (u8 i = 0; i < N; ++i) \
+	for (size_t i = 0; i < N; ++i) \
 		v.s[i] = srandf(); \
 	return v ## N ## _norm(v); \
 }
