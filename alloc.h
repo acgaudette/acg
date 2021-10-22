@@ -1,3 +1,6 @@
+#ifndef ALLOC_H
+#define ALLOC_H
+
 #include <assert.h>
 #include <errno.h>
 
@@ -97,3 +100,5 @@ static void *alloc(u32 n, allocator allocator)
 		panic();
 	}
 }
+
+#endif

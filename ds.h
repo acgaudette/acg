@@ -1,3 +1,6 @@
+#ifndef DS_H
+#define DS_H
+
 #include <string.h>
 #include "acg/alloc.h"
 #include "acg/minmax.h"
@@ -129,6 +132,10 @@ static void abuf_clear(abuf *abuf)
 	T *T = ABUF_HEAD_UNSAFE(VAR); \
 	(void*)T < ABUF_NPTR(VAR);    \
 	T = ABUF_NEXT_UNSAFE(VAR, T))
+#define ABUF_FOREACH_REV(VAR, T) for (     \
+	T *T = ABUF_TAIL(VAR);             \
+	(void*)T >= ABUF_HEAD_UNSAFE(VAR); \
+	T = ABUF_PREV_UNSAFE(VAR, T))
 
 #define VBUF(VAR, T, CAP) u32 VAR ## _n ; T VAR [ CAP ]
 #define VBUF_MK(VAR, T, CAP) u32 VAR ## _n = 0; T VAR [ CAP ]
@@ -208,3 +215,5 @@ static void sort_count(
 
 #define ABUF_SORT_COUNT(VAR, T, K, FN) \
 	sort_count(ABUF_HEAD_UNSAFE(VAR), K, FN, VAR->n, sizeof(T), VAR->size)
+
+#endif
