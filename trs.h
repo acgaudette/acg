@@ -14,9 +14,10 @@ typedef struct {
 } t3;
 typedef t3 ttt;
 
-#define T3_ID ((ttt) { .scale = 1.f, .rot = QT_ID })
+#define T3_V(V) ((t3) { .scale = 1.f, .pos = V, .rot = QT_ID })
+#define T3_ID   ((t3) { .scale = 1.f,           .rot = QT_ID })
 
-static inline t3 t3_app(t3 parent, t3 child)
+static inline t3 t3_app(const t3 parent, const t3 child)
 {
 	return (t3) {
 		.scale = parent.scale * child.scale,
@@ -28,7 +29,12 @@ static inline t3 t3_app(t3 parent, t3 child)
 	};
 }
 
-static inline m4 t3_to_m4(t3 trs)
+static inline v3 t3_app_v(const t3 parent, const v3 v)
+{
+	return t3_app(parent, T3_V(v)).pos;
+}
+
+static inline m4 t3_to_m4(const t3 trs)
 {
 	return m4_model(trs.pos, trs.rot, trs.scale);
 }
