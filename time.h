@@ -2,6 +2,10 @@
 #define MIN_DT 1e-4
 #endif
 
+#ifndef ACG_REAL
+#define ACG_REAL float
+#endif
+
 enum _time_type {
 	  _T_NONE
 	, _T_REAL
@@ -11,25 +15,25 @@ enum _time_type {
 
 extern struct _time {
 	struct {
-		float real;
-		float game;
+		ACG_REAL real;
+		ACG_REAL game;
 	} el;
 
 	struct {
-		float real;
-		float game;
+		ACG_REAL real;
+		ACG_REAL game;
 	} dt;
 
 #ifdef FIXED_DT
 	struct {
-		float acc;
-		float rem;
+		ACG_REAL acc;
+		ACG_REAL rem;
 	} fixed;
 #endif
-	float scale; // Remember to initialize!
+	ACG_REAL scale; // Remember to initialize!
 } _time;
 
-static int _time_tick(float *t, float *dt)
+static int _time_tick(ACG_REAL *t, ACG_REAL *dt)
 {
 	_time.el.real = *t;
 	_time.dt.real = *dt;
@@ -61,7 +65,7 @@ static int _time_step()
 }
 #endif
 
-static inline float _time_dt(enum _time_type e)
+static inline ACG_REAL _time_dt(enum _time_type e)
 {
 	switch (e) {
 	case _T_REAL:
@@ -77,7 +81,7 @@ static inline float _time_dt(enum _time_type e)
 	}
 }
 
-static inline float _time_el(enum _time_type e)
+static inline ACG_REAL _time_el(enum _time_type e)
 {
 	switch (e) {
 	case _T_REAL:
