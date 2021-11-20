@@ -31,7 +31,12 @@ typedef struct {
 	float far;
 } cam3;
 
-#define CAM3_DEFAULT ((cam3) { .rot = QT_ID, .asp = 1.f, .fov = 60.f })
+#define CAM3_DEFAULT ((cam3) { \
+	.rot = QT_ID,          \
+	.asp = 1.f,            \
+	.fov = 60.f,           \
+	.near = 1.f,           \
+	.far = 1024.f })
 
 static inline m4 cam3_conv(const cam3 cam, int gl)
 {
