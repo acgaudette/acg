@@ -28,6 +28,19 @@ static u32 align_up(u32 a, u32 to)
 	return (a + to) & ~to;
 }
 
+static u32 next_pow(u32 a)
+{
+	--a;
+	a |= a >> 1;
+	a |= a >> 2;
+	a |= a >> 4;
+	a |= a >> 8;
+	a |= a >> 16;
+	++a;
+
+	return a;
+}
+
 static void dump_vmem()
 {
 #ifdef __linux__
@@ -99,6 +112,43 @@ static void *alloc(u32 n, allocator allocator)
 	default:
 		panic();
 	}
+}
+
+extern struct bump_mem {
+	u32 i, size;
+	char *src;
+} bump_mem;
+
+static void bump_init(void *src, const u32 size)
+{
+	assert(size);
+	bump_mem.size = size;
+
+	if (src) {
+		bump_mem.src = src;
+		return;
+	}
+
+	bump_mem.src = alloc(size, ALLOC_SYS);
+}
+
+static void *bump_alloc(const u32 n)
+{
+	assert(bump_mem.src);
+	assert(n);
+
+	const u32 size = align_up(n, next_pow(n));
+	assert(size);
+	assert(size < UINT_MAX - bump_mem.i);
+
+	char *result = bump_mem.src + bump_mem.i;
+	bump_mem.i += size;
+	return result;
+}
+
+static void bump_clear()
+{
+	bump_mem.i = 0;
 }
 
 #endif
