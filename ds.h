@@ -12,14 +12,14 @@ typedef struct {
 	u32    n;
 } abuf;
 
-#define ABUF_CAP_STR(CAP) \
+#define DS_CAP_STR(CAP) \
 	CAP > 1e6f, \
 	CAP > 1e6f ? CAP / 1e6f : (CAP > 1e4f ? CAP / 1e3f : CAP), \
 	CAP > 1e6f ? "M" : (CAP > 1e4f ? "K" : "")
 #define ABUF_MK_LOG(VAR, T) \
 printf( \
 	"abuf \"" #VAR "\" of type " #T ": %.*f%s elements, %.1f %s\n", \
-	ABUF_CAP_STR(VAR->cap), \
+	DS_CAP_STR(VAR->cap), \
 	(VAR->off + VAR->size * VAR->cap) / (1024.f * 1024.f), "MiB"), \
 dump_vmem()
 
@@ -139,6 +139,9 @@ static void abuf_clear(abuf *abuf)
 
 #define VBUF(VAR, T, CAP) u32 VAR ## _n ; T VAR [ CAP ]
 #define VBUF_MK(VAR, T, CAP) u32 VAR ## _n = 0; T VAR [ CAP ]
+#define VBUF_MK_MB(VAR, T, MB) \
+	_Static_assert(MB < 4096, "VBUF oversized"); \
+	u32 VAR ## _n = 0; T VAR [ (MB * 1024 * 1024) / sizeof(T) ]
 #define VBUF_INIT(VAR) VAR ## _n = 0
 
 #define VBUF_I(VAR, ENTRY) (ENTRY - VAR)
@@ -157,6 +160,13 @@ static void abuf_clear(abuf *abuf)
 	E = VAR ; for (u32 i = 0; i < VAR ## _n; E = ++i + VAR)
 #define VBUF_FOREACH(VAR, T) \
 	for (T *T = VAR; T - VAR < VAR ## _n; ++T)
+
+#define VBUF_LOG(VAR) \
+printf( \
+	"VBUF \"" #VAR "\": %.*f%s elements, %.1f %s\n", \
+	DS_CAP_STR(VBUF_CAP(VAR)), \
+	sizeof(VAR) / (1024.f * 1024.f), "MiB"), \
+dump_vmem()
 
 // In-place counting sort, where k is the maximum value returned by keyof()
 typedef u16 (*keyof)(void*);
