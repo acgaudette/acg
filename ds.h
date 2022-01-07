@@ -150,6 +150,8 @@ static void abuf_clear(abuf *abuf)
 
 #define VBUF_PUSH(VAR) \
 	(assert(VAR ## _n < VBUF_CAP(VAR)), (VAR) + VAR ## _n++)
+#define VBUF_POP(VAR) \
+	(assert(VAR ## _n), (VAR) + --VAR ## _n)
 #define VBUF_RMSWAP(VAR, ENTRY) \
 	(assert(VBUF_I(VAR, ENTRY) < VAR ## _n), *ENTRY = VAR[--VAR ## _n])
 
