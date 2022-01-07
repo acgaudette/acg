@@ -157,6 +157,13 @@ static void abuf_clear(abuf *abuf)
 #define VBUF_RMSWAP(VAR, ENTRY) \
 	(assert(VBUF_CONTAINS(VAR, ENTRY)), *(ENTRY) = (VAR)[--VAR ## _n])
 
+#define VBUF_RM(VAR, I) \
+{ \
+	u32 i = I; \
+	assert(i < VAR ## _n), --VAR ## _n; \
+	for (; i < VAR ## _n; ++i) (VAR)[i] = (VAR)[i + 1]; \
+}
+
 #define VBUF_SWAP(VAR, T, I, J) \
 { \
 	assert((I) < VAR ## _n), assert((J) < VAR ## _n); \
