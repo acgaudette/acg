@@ -27,8 +27,8 @@ dump_vmem()
 	VAR = abuf_mk(CAP, ALLOCATOR, sizeof(T), 1), \
 	ABUF_MK_LOG(VAR, T)
 #define ABUF_MK_MB(VAR, T, MB, ALLOCATOR) \
-	assert(MB < 4096), \
-	VAR = abuf_mk((MB * 1024 * 1024) / sizeof(T), ALLOCATOR, sizeof(T), 1), \
+	assert((MB) < 4096), \
+	VAR = abuf_mk(((MB) * 1024 * 1024) / sizeof(T), ALLOCATOR, sizeof(T), 1), \
 	ABUF_MK_LOG(VAR, T)
 
 static abuf *abuf_mk(
@@ -54,7 +54,8 @@ static abuf *abuf_mk(
 	return abuf;
 }
 
-#define ABUF_GET_UNSAFE(VAR, I) ((void*)((char*)VAR + VAR->off + VAR->size * I))
+#define ABUF_GET_UNSAFE(VAR, I) \
+	((void*)((char*)(VAR) + (VAR)->off + (VAR)->size * (I)))
 static inline void *abuf_get(abuf *abuf, u32 i)
 {
 	assert(abuf);
@@ -62,13 +63,13 @@ static inline void *abuf_get(abuf *abuf, u32 i)
 	return ABUF_GET_UNSAFE(abuf, i);
 }
 
-#define ABUF_HEAD_UNSAFE(VAR) ((void*)((char*)VAR + VAR->off))
+#define ABUF_HEAD_UNSAFE(VAR) ((void*)((char*)(VAR) + (VAR)->off))
 #define ABUF_HEAD(VAR) abuf_get(VAR, 0)
-#define ABUF_TAIL(VAR) abuf_get(VAR, VAR->n - 1)
-#define ABUF_I(VAR, E) (((char*)E - (char*)ABUF_HEAD(VAR)) / VAR->size)
-#define ABUF_NPTR(VAR) ABUF_GET_UNSAFE(VAR, VAR->n)
-#define ABUF_NEXT_UNSAFE(VAR, E) ((void*)((char*)E + VAR->size))
-#define ABUF_PREV_UNSAFE(VAR, E) ((void*)((char*)E - VAR->size))
+#define ABUF_TAIL(VAR) abuf_get(VAR, (VAR)->n - 1)
+#define ABUF_I(VAR, E) (((char*)(E) - (char*)ABUF_HEAD(VAR)) / (VAR)->size)
+#define ABUF_NPTR(VAR) ABUF_GET_UNSAFE((VAR), (VAR)->n)
+#define ABUF_NEXT_UNSAFE(VAR, E) ((void*)((char*)(E) + (VAR)->size))
+#define ABUF_PREV_UNSAFE(VAR, E) ((void*)((char*)(E) - (VAR)->size))
 
 static inline void *abuf_next(abuf *abuf, void *entry)
 {
@@ -141,14 +142,14 @@ static void abuf_clear(abuf *abuf)
 #define VBUF_MK(VAR, T, CAP) u32 VAR ## _n = 0; T VAR [ CAP ]
 #define VBUF_MK_MB(VAR, T, MB) \
 	_Static_assert(MB < 4096, "VBUF oversized"); \
-	u32 VAR ## _n = 0; T VAR [ (MB * 1024 * 1024) / sizeof(T) ]
+	u32 VAR ## _n = 0; T VAR [ ((MB) * 1024 * 1024) / sizeof(T) ]
 #define VBUF_INIT(VAR) VAR ## _n = 0
 
-#define VBUF_I(VAR, ENTRY) (ENTRY - VAR)
-#define VBUF_CAP(VAR) (sizeof(VAR) / sizeof(VAR[0]))
+#define VBUF_I(VAR, ENTRY) ((ENTRY) - (VAR))
+#define VBUF_CAP(VAR) (sizeof(VAR) / sizeof((VAR)[0]))
 
 #define VBUF_PUSH(VAR) \
-	(assert(VAR ## _n < VBUF_CAP(VAR)), VAR + VAR ## _n++)
+	(assert(VAR ## _n < VBUF_CAP(VAR)), (VAR) + VAR ## _n++)
 #define VBUF_RMSWAP(VAR, ENTRY) \
 	(assert(VBUF_I(VAR, ENTRY) < VAR ## _n), *ENTRY = VAR[--VAR ## _n])
 
