@@ -152,8 +152,10 @@ static void abuf_clear(abuf *abuf)
 	(assert(VAR ## _n < VBUF_CAP(VAR)), (VAR) + VAR ## _n++)
 #define VBUF_POP(VAR) \
 	(assert(VAR ## _n), (VAR) + --VAR ## _n)
+#define VBUF_CONTAINS(VAR, ENTRY) \
+	(VBUF_I(VAR, (ENTRY)) < VAR ## _n)
 #define VBUF_RMSWAP(VAR, ENTRY) \
-	(assert(VBUF_I(VAR, ENTRY) < VAR ## _n), *ENTRY = VAR[--VAR ## _n])
+	(assert(VBUF_CONTAINS(VAR, ENTRY)), *(ENTRY) = (VAR)[--VAR ## _n])
 
 #define VBUF_ITER(VAR) for ( \
 	struct { u32 i; void *val; } iter = { .val = VAR }; \
