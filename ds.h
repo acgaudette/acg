@@ -157,6 +157,14 @@ static void abuf_clear(abuf *abuf)
 #define VBUF_RMSWAP(VAR, ENTRY) \
 	(assert(VBUF_CONTAINS(VAR, ENTRY)), *(ENTRY) = (VAR)[--VAR ## _n])
 
+#define VBUF_SWAP(VAR, T, I, J) \
+{ \
+	assert((I) < VAR ## _n), assert((J) < VAR ## _n); \
+	T swap  = VAR [I]; \
+	VAR [I] = VAR [J]; \
+	VAR [J] = swap;    \
+}
+
 #define VBUF_ITER(VAR) for ( \
 	struct { u32 i; void *val; } iter = { .val = VAR }; \
 	iter.i < VAR ## _n; \
