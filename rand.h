@@ -19,6 +19,14 @@ static char randc()
 	return 'A' + 25 * randf();
 }
 
+static u32 randu32(
+	  const u32 min // Inclusive
+	, const u32 max // Exclusive
+) {
+	assert(max > min);
+	return rand() % (max - min) + min;
+}
+
 #define RAND(N) static v ## N randv ## N () \
 { \
 	v ## N v; \
