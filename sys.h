@@ -25,7 +25,13 @@ static void panic_msg(const char *msg)
 __attribute__((noreturn))
 static void panic_perr(const char *msg)
 {
-	fprintf(stderr, "panic! %s: %s\n", msg, strerror(errno));
+#ifndef _WIN32
+	char *buf = strerror(errno);
+#else
+	char buf[80];
+	strerror_s(buf, 80, errno);
+#endif
+	fprintf(stderr, "panic! %s: %s\n", msg, buf);
 	panic();
 }
 
