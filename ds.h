@@ -93,6 +93,15 @@ static inline void *abuf_push(abuf *abuf)
 	return ABUF_HEAD_UNSAFE(abuf) + abuf->size * abuf->n++;
 }
 
+static inline void abuf_grow(abuf *abuf, const u32 amt)
+{
+	assert(abuf);
+	const u32 rem = ~(u32)0 - abuf->n;
+	assert(amt <= rem);
+	assert(abuf->n + amt <= abuf->cap);
+	abuf->n += amt;
+}
+
 #define ABUF_RMSWAP(VAR, E) abuf_rmswap(VAR, E, sizeof(*E))
 static inline void abuf_rmswap(abuf *abuf, void *entry, u32 size)
 {
