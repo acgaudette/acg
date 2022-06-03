@@ -17,6 +17,10 @@ typedef t3 ttt;
 #define T3_V(V) ((t3) { .scale = 1.f, .pos = V, .rot = QT_ID })
 #define T3_ID   ((t3) { .scale = 1.f,           .rot = QT_ID })
 
+#define T3_TR(T, R) ((t3) { .scale = 1.f, .pos = T, .rot = R     })
+#define T3_ST(S, T) ((t3) { .scale =   S, .pos = T, .rot = QT_ID })
+#define T3_SR(S, R) ((t3) { .scale =   S,           .rot = R     })
+
 static inline t3 t3_app(const t3 parent, const t3 child)
 {
 	return (t3) {
