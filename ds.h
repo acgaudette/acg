@@ -190,6 +190,8 @@ static void abuf_clear(abuf *abuf)
 	E = VAR ; for (u32 i = 0; i < VAR ## _n; E = ++i + VAR)
 #define VBUF_FOREACH(VAR, T) \
 	for (T *T = VAR; T - VAR < VAR ## _n; ++T)
+#define VBUF_FOREACH_REV(VAR, T) \
+	for (T *T = VAR + VAR ## _n - 1; T >= VAR; --T)
 
 #define VBUF_LOG(VAR) \
 printf( \
