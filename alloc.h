@@ -143,6 +143,8 @@ static void *bump_alloc(const u32 n)
 
 	char *result = bump_mem.src + bump_mem.i;
 	bump_mem.i += size;
+
+	assert(bump_mem.i <= bump_mem.size);
 	return result;
 }
 
