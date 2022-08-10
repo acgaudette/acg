@@ -28,6 +28,14 @@ static u32 align_up(u32 a, u32 to)
 	return (a + to) & ~to;
 }
 
+static void *align_up_ptr(void *ptr, u32 to)
+{
+	assert(to);
+	const uintptr_t a = (uintptr_t)ptr;
+	const uintptr_t b = to - 1;
+	return (void*)((a + b) & ~b);
+}
+
 static u32 next_pow(u32 a)
 {
 	--a;

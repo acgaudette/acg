@@ -24,12 +24,11 @@ printf( \
 dump_vmem()
 
 #define ABUF_MK(VAR, T, CAP, ALLOCATOR) \
-	VAR = abuf_mk(CAP, ALLOCATOR, sizeof(T), 1), \
+	VAR = abuf_mk(CAP, ALLOCATOR, sizeof(T), MIN(64, sizeof(T))), \
 	ABUF_MK_LOG(VAR, T)
 #define ABUF_MK_MB(VAR, T, MB, ALLOCATOR) \
 	assert((MB) < 4096), \
-	VAR = abuf_mk(((MB) * 1024 * 1024) / sizeof(T), ALLOCATOR, sizeof(T), 1), \
-	ABUF_MK_LOG(VAR, T)
+	ABUF_MK(VAR, T, ((MB) * 1024 * 1024) / sizeof(T), ALLOCATOR)
 
 static abuf *abuf_mk(
 	const u64 cap,
@@ -42,16 +41,17 @@ static abuf *abuf_mk(
 	assert(size);
 	u64 off = MAX(size, sizeof(abuf));
 
-	u64 total = size * cap + off;
+	u64 total = size * cap + off
+		+ (align); // Store a u32 here later to free
+
 	assert(total <= ~(u32)0);
-	abuf *abuf = alloc(total, allocator);
+	void *raw = alloc(total, allocator);
+	abuf *buf = align_up_ptr(raw, align);
 
-	abuf->size = size;
-	abuf->off = off;
-	abuf->cap = cap;
-	abuf->n = 0;
+	assert((char*)buf - (char*)raw < align);
+	*buf = (abuf) { size, off, cap };
 
-	return abuf;
+	return buf;
 }
 
 #define ABUF_GET_UNSAFE(VAR, I) \
