@@ -258,4 +258,39 @@ static void sort_count(
 #define ABUF_SORT_COUNT(VAR, T, K, FN) \
 	sort_count(ABUF_HEAD_UNSAFE(VAR), K, FN, VAR->n, sizeof(T), VAR->size)
 
+typedef int (*ds_lt)(const void*, const void*); // Nonzero if a < b
+static void sort_sel(
+	void *buf,
+	const u32 n,
+	const u32 size,
+	const u32 align,
+	ds_lt lt
+) {
+	assert(buf);
+	assert(size);
+	assert(align);
+
+	void *swap[size];
+
+	for (u32 i = 0; i < align * n; i += align) {
+		void *I = (char*)buf + i;
+		void *best = I;
+
+		for (u32 j = i; j < align * n; j += align) {
+			void *J = (char*)buf + j;
+			if (lt(J, best))
+				best = J;
+		}
+
+		if (best != I) {
+			memcpy(swap,    I, size);
+			memcpy(   I, best, size);
+			memcpy(best, swap, size);
+		}
+	}
+}
+
+#define VBUF_SORT_SEL(VAR, T, FN) \
+	sort_sel(VAR, VAR ## _n, sizeof(T), sizeof(T), FN)
+
 #endif
