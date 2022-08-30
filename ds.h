@@ -5,6 +5,11 @@
 #include "acg/alloc.h"
 #include "acg/minmax.h"
 
+#define LOOP(T, I, A, B) for (T I = A; I < B; ++I)
+#define LOOP0(T, I, N) LOOP(T, I, 0, N)
+#define FOREACH(VAR, T, N) \
+	for (T *T = VAR; T - VAR < N; ++T)
+
 typedef struct {
 	u32 size;
 	u32  off;
