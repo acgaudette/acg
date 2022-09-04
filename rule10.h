@@ -1,66 +1,46 @@
-#define ACG_EMPTY()
-#define ACG_DEFER(ID) ID ACG_EMPTY() // (ARGS)
-#define ACG_CONSUME(...)
-#define ACG_EVAL(...) __VA_ARGS__
+// Unless stated otherwise,
+// conditional syntax is as follows:
+//   IF      (COND) (THEN)
+//   IF_ELSE (COND) (THEN) (ELSE)
 
-#define JOIN_2(A, B) A ## B
-#define JOIN_3(A, B, C) A ## B ## C
-#define JOIN(A, B) JOIN_2(A, B)
+#define ARG_NULL ()
 
-#define ACG_IF___ELSE(...) /* CONSUME */ ACG_EVAL
-#define ACG_IF_0_ELSE(...) /* CONSUME */ ACG_EVAL
-#define ACG_IF_1_ELSE(...)  __VA_ARGS__  ACG_CONSUME
+/* Simple conditional:
+ * COND must resolve to either 'false'
+ * (accepted values are '0' or '_')
+ * or '1' ('true')
+ */
+
+#define IF_01(COND) JOIN(ACG_IF_, COND) // (THEN)
 #define IF_01_ELSE(COND) JOIN_3(ACG_IF_, COND, _ELSE) // (THEN) (ELSE)
 
-#define ACG_IF__(...) /* CONSUME */
-#define ACG_IF_0(...) /* CONSUME */
-#define ACG_IF_1(...)  __VA_ARGS__
-#define IF_01(COND) JOIN(ACG_IF_, COND) // (THEN)
-
-#define FST(FST, ...)      FST
-#define SND(___, SND, ...) SND
-
-#define ACG_IS_ONE(...) SND(__VA_ARGS__, 0)
-#define ACG_ONE $, 1
-#define ACG_ONE_CONSUME(...) ACG_ONE
-
-#define ACG_NOT__ ACG_ONE
-#define ACG_NOT_0 ACG_ONE
-#define NOT(_) ACG_IS_ONE(JOIN(ACG_NOT_, _))
-#define CAST_BOOL(_) NOT(NOT(_))
+/* More powerful conditional:
+ * COND must resolve to either 'false' (see above)
+ * or any valid identifier ('true' -- an 'implicit bool cast'),
+ * including spaces and some special characters
+ */
 
 #define IF_ELSE(COND) IF_01_ELSE(CAST_BOOL(COND)) // (THEN) (ELSE)
 #define IF(COND) IF_01(CAST_BOOL(COND)) // (THEN)
 
-#define IS_WRAPPED(_) ACG_IS_ONE(ACG_ONE_CONSUME _)
+/* Even more powerful conditional:
+ * COND may be just about any input ('true'),
+ * as long as it is not wrapped in parens,
+ * or 'null' (ARG_NULL)
+ */
 
-#define WRAP(...) (__VA_ARGS__)
-#define UNWRAP(...) ACG_EVAL __VA_ARGS__
+#define IF_EXISTS(COND) IF_NOT_ARG_NULL(COND) // (THEN)
+#define IF_EXISTS_ELSE(COND) IF_NOT_ARG_NULL_ELSE(COND) // (THEN) (ELSE)
 
-#define IF_WRAPPED(COND) IF_01(IS_WRAPPED(COND)) // (THEN)
-#define IF_WRAPPED_ELSE(COND) IF_01_ELSE(IS_WRAPPED(COND)) // (THEN) (ELSE)
+/* Take a nullable value and 'unwrap' it in place;
+ * if it is indeed null, return empty
+ */
 
-#define TRY_UNWRAP(COND) IF_WRAPPED(COND) (UNWRAP(COND))
+#define TRY_EMPLACE(ARG) IF_EXISTS(ARG) (ARG)
+#define TRY_EMPLACE_WITH(ARG, WITH) IF_EXISTS(ARG) (ARG WITH)
+#define TRY_EMPLACE_WITH_COMMA(ARG) IF_EXISTS(ARG) (ARG ,)
 
-#define IF_UNWRAPPED(COND) IF_01(NOT(IS_WRAPPED(COND))) // (THEN)
-#define IF_UNWRAPPED_ELSE(COND) IF_01_ELSE(NOT(IS_WRAPPED(COND))) // (THEN) (ELSE)
-
-#define ACG_AND_00 0
-#define ACG_AND_01 0
-#define ACG_AND_11 1
-#define ACG_AND_10 0
-#define AND(A, B) JOIN_3(ACG_AND_, A, B)
-
-#define IS_WRAPPED_FALSE(_) \
-	AND(IS_WRAPPED(_), NOT(UNWRAP(_)))
-#define IS_WRAPPED_TRUE(_) \
-	AND(IS_WRAPPED(_), CAST_BOOL(UNWRAP(_)))
-
-#define IS_EMPTY(ARG) ACG_IS_ONE(JOIN_3(ACG_NOT_, _, ARG))
-#define IS_WRAPPED_EMPTY(_) \
-	AND(IS_WRAPPED(_), IS_EMPTY(UNWRAP(_)))
-
-#define ARG_NULL ()
+/* Additional null checks */
 
 #define IF_ARG_NULL(COND) IF_01(IS_WRAPPED_EMPTY(COND)) // (THEN)
 #define IF_ARG_NULL_ELSE(COND) \
@@ -70,12 +50,51 @@
 #define IF_NOT_ARG_NULL_ELSE(COND) \
 	IF_01_ELSE(NOT(IS_WRAPPED_EMPTY(COND))) // (THEN) (ELSE)
 
-#define IF_EXISTS(COND) IF_NOT_ARG_NULL(COND) // (THEN)
-#define IF_EXISTS_ELSE(COND) IF_NOT_ARG_NULL_ELSE(COND) // (THEN) (ELSE)
+/* Utility */
 
-#define TRY_EMPLACE(ARG) IF_EXISTS(ARG) (ARG)
-#define TRY_EMPLACE_WITH(ARG, WITH) IF_EXISTS(ARG) (ARG WITH)
-#define TRY_EMPLACE_WITH_COMMA(ARG) IF_EXISTS(ARG) (ARG ,)
+#define EMPTY()
+#define IS_EMPTY(ARG) ACG_IS_ONE(JOIN_3(ACG_NOT_, _, ARG))
+
+#define FST(FST, ...)      FST
+#define SND(___, SND, ...) SND
+
+#define NOT(_) ACG_IS_ONE(JOIN(ACG_NOT_, _))
+#define CAST_BOOL(_) NOT(NOT(_))
+
+#define AND(A, B) JOIN_3(ACG_AND_, A, B)
+
+#define JOIN(A, B) JOIN_2(A, B)
+#define JOIN_2(A, B)    A ## B
+#define JOIN_3(A, B, C) A ## B ## C
+
+/* Paren 'wrapping' */
+
+#define WRAP(...) (__VA_ARGS__)
+#define UNWRAP(...) ACG_EVAL __VA_ARGS__
+
+#define IS_WRAPPED(_) ACG_IS_ONE(ACG_ONE_CONSUME _)
+
+#define TRY_UNWRAP(...) \
+	IF_WRAPPED(__VA_ARGS__) (UNWRAP(__VA_ARGS__))
+
+#define IF_WRAPPED(COND) \
+	IF_01(IS_WRAPPED(COND)) // (THEN)
+#define IF_WRAPPED_ELSE(COND) \
+	IF_01_ELSE(IS_WRAPPED(COND)) // (THEN) (ELSE)
+
+#define IF_UNWRAPPED(COND) \
+	IF_01(NOT(IS_WRAPPED(COND))) // (THEN)
+#define IF_UNWRAPPED_ELSE(COND) \
+	IF_01_ELSE(NOT(IS_WRAPPED(COND))) // (THEN) (ELSE)
+
+#define IS_WRAPPED_FALSE(_) \
+	AND(IS_WRAPPED(_), NOT(UNWRAP(_)))
+#define IS_WRAPPED_TRUE(_) \
+	AND(IS_WRAPPED(_), CAST_BOOL(UNWRAP(_)))
+#define IS_WRAPPED_EMPTY(_) \
+	AND(IS_WRAPPED(_), IS_EMPTY(UNWRAP(_)))
+
+/* &c */
 
 #define PASTE_1(...) __VA_ARGS__
 #define PASTE_2(...)  PASTE_1(__VA_ARGS__)  PASTE_1(__VA_ARGS__)
@@ -109,3 +128,28 @@
 #define PASTE_30(...) PASTE_16(__VA_ARGS__) PASTE_14(__VA_ARGS__)
 #define PASTE_31(...) PASTE_16(__VA_ARGS__) PASTE_15(__VA_ARGS__)
 #define PASTE_32(...) PASTE_16(__VA_ARGS__) PASTE_16(__VA_ARGS__)
+
+/* Internal */
+
+#define ACG_CONSUME(...)
+#define ACG_EVAL(...) __VA_ARGS__
+
+#define ACG_IF__(...) /* CONSUME */
+#define ACG_IF_0(...) /* CONSUME */
+#define ACG_IF_1(...)  __VA_ARGS__
+
+#define ACG_IF___ELSE(...) /* CONSUME */ ACG_EVAL
+#define ACG_IF_0_ELSE(...) /* CONSUME */ ACG_EVAL
+#define ACG_IF_1_ELSE(...)  __VA_ARGS__  ACG_CONSUME
+
+#define ACG_IS_ONE(...) SND(__VA_ARGS__, 0)
+#define ACG_ONE $, 1
+#define ACG_ONE_CONSUME(...) ACG_ONE
+
+#define ACG_NOT__ ACG_ONE
+#define ACG_NOT_0 ACG_ONE
+
+#define ACG_AND_00 0
+#define ACG_AND_01 0
+#define ACG_AND_11 1
+#define ACG_AND_10 0
