@@ -95,7 +95,7 @@ static inline void *abuf_push(abuf *abuf)
 {
 	assert(abuf);
 	assert(abuf->n < abuf->cap);
-	return ABUF_HEAD_UNSAFE(abuf) + abuf->size * abuf->n++;
+	return (char*)ABUF_HEAD_UNSAFE(abuf) + abuf->size * abuf->n++;
 }
 
 static inline void abuf_grow(abuf *abuf, const u32 amt)
@@ -128,7 +128,7 @@ static inline void *abuf_pop(abuf *abuf)
 {
 	assert(abuf);
 	assert(abuf->n);
-	return ABUF_HEAD_UNSAFE(abuf) + abuf->size * abuf->n--;
+	return (char*)ABUF_HEAD_UNSAFE(abuf) + abuf->size * abuf->n--;
 }
 
 static void abuf_clear(abuf *abuf)
