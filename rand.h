@@ -1,6 +1,12 @@
 static float randf() // Inclusive
 {
+#ifndef ACG_RAND_NO_ALG
 	return clamp01f(rand() / (float)RAND_MAX);
+#else
+	const float result = rand() / (float)RAND_MAX;
+	return result > 1.f ? 1.f :
+	      (result < 0.f ? 0.f : result);
+#endif
 }
 
 static float randfx() // Exclusive at max
@@ -37,6 +43,7 @@ static u32 randu32(
 	return rand() % (max - min) + min;
 }
 
+#ifndef ACG_RAND_NO_ALG
 #define RAND(N) static v ## N randv ## N () \
 { \
 	v ## N v; \
@@ -75,3 +82,4 @@ DRAND(2)
 DRAND(3)
 DRAND(4)
 #undef DRAND
+#endif
