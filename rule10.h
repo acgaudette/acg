@@ -175,7 +175,7 @@
 #define ACG_IF_1_ELSE(...)  __VA_ARGS__  ACG_CONSUME
 
 #define ACG_IS_ONE(...) SND(__VA_ARGS__, 0)
-#define ACG_ONE $, 1
+#define ACG_ONE %, 1
 #define ACG_ONE_CONSUME(...) ACG_ONE
 
 #define ACG_NOT__ ACG_ONE
