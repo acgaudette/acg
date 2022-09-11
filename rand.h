@@ -1,6 +1,16 @@
-static float randf()
+static float randf() // Inclusive
 {
 	return clamp01f(rand() / (float)RAND_MAX);
+}
+
+static float randfx() // Exclusive at max
+{
+	return fmodf(randf(), 1.f);
+}
+
+static int randb()
+{
+	return randf() > .5f;
 }
 
 static float srandf()
@@ -8,7 +18,7 @@ static float srandf()
 	return 2.f * randf() - 1.f;
 }
 
-static float randr(const float min, const float max)
+static float randr(const float min, const float max) // Inclusive
 {
 	assert(max >= min);
 	return randf() * (max - min) + min;
