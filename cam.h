@@ -38,10 +38,16 @@ typedef struct {
 	.near = 1.f,           \
 	.far = 1024.f })
 
-static inline m4 cam3_conv(const cam3 cam, int gl)
+static inline m4 cam3_conv_10(const cam3 cam)
 {
 	const m4 view = m4_view(cam.pos, cam.rot);
-	m4 proj = m4_persp(cam.fov, cam.asp, cam.near, cam.far);
-	if (gl) proj.c1.y *= -1.f;
+	const m4 proj = m4_persp_10(cam.fov, cam.asp, cam.near, cam.far);
+	return m4_mul(proj, view);
+}
+
+static inline m4 cam3_conv_10_inf(const cam3 cam)
+{
+	const m4 view = m4_view(cam.pos, cam.rot);
+	const m4 proj = m4_persp_10_inf(cam.fov, cam.asp, cam.near);
 	return m4_mul(proj, view);
 }
