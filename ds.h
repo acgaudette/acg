@@ -28,12 +28,16 @@ printf( \
 	(VAR->off + VAR->size * VAR->cap) / (1024.f * 1024.f), "MiB"), \
 dump_vmem()
 
+#define ABUF_MK_SILENT(VAR, T, CAP, ALLOCATOR) \
+	VAR = abuf_mk(CAP, ALLOCATOR, sizeof(T), MIN(64, sizeof(T)))
 #define ABUF_MK(VAR, T, CAP, ALLOCATOR) \
-	VAR = abuf_mk(CAP, ALLOCATOR, sizeof(T), MIN(64, sizeof(T))), \
+	ABUF_MK_SILENT(VAR, T, CAP, ALLOCATOR), \
 	ABUF_MK_LOG(VAR, T)
 #define ABUF_MK_MB(VAR, T, MB, ALLOCATOR) \
 	assert((MB) < 4096), \
 	ABUF_MK(VAR, T, ((MB) * 1024 * 1024) / sizeof(T), ALLOCATOR)
+#define ABUF_MK_TMP(VAR, T, CAP) \
+	ABUF_MK_SILENT(VAR, T, CAP, ALLOC_BUMP)
 
 static abuf *abuf_mk(
 	const u64 cap,
