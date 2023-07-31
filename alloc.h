@@ -19,6 +19,7 @@ typedef enum {
 	  ALLOC_NONE
 	, ALLOC_SYS
 	, ALLOC_VMEM
+	, ALLOC_BUMP
 } allocator;
 
 static u32 align_up(u32 a, u32 to)
@@ -103,30 +104,12 @@ static void *alloc_vmem(u32 n)
 }
 #endif
 
-static void *alloc(u32 n, allocator allocator)
-{
-	assert(n);
-	void *result;
-
-	switch (allocator) {
-	case ALLOC_SYS:
-		result = malloc(n);
-		assert(result);
-		return result;
-#ifndef _WIN32
-	case ALLOC_VMEM:
-		return alloc_vmem(n);
-#endif
-	default:
-		panic();
-	}
-}
-
 extern struct bump_mem {
 	u32 i, size;
 	char *src;
 } bump_mem;
 
+static void *alloc(u32, allocator);
 static void bump_init(void *src, const u32 size)
 {
 	assert(size);
@@ -153,12 +136,34 @@ static void *bump_alloc(const u32 n)
 	bump_mem.i += size;
 
 	assert(bump_mem.i <= bump_mem.size);
+	assert(result);
 	return result;
 }
 
 static void bump_clear()
 {
 	bump_mem.i = 0;
+}
+
+static void *alloc(u32 n, allocator allocator)
+{
+	assert(n);
+	void *result;
+
+	switch (allocator) {
+	case ALLOC_SYS:
+		result = malloc(n);
+		assert(result);
+		return result;
+#ifndef _WIN32
+	case ALLOC_VMEM:
+		return alloc_vmem(n);
+#endif
+	case ALLOC_BUMP:
+		return bump_alloc(n);
+	default:
+		panic();
+	}
 }
 
 #endif
