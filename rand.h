@@ -43,6 +43,17 @@ static u32 randu32(
 	return rand() % (max - min) + min;
 }
 
+static enum coin {
+	  COIN_TAILS
+	, COIN_HEADS
+} coin_flip() { return randb() ; }
+
+static u32 rand_d(const u32 n)
+{
+	assert(n);
+	return randu32(1, n + 1);
+}
+
 #ifndef ACG_RAND_NO_ALG
 #define RAND(N) static v ## N randv ## N () \
 { \
